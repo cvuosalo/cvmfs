@@ -138,9 +138,10 @@ CommitProcessor::Result CommitProcessor::Process(
   }
 
   const std::string public_key = "/etc/cvmfs/keys/" + repo_name + ".pub";
-  const std::string trusted_certs =
-      "/etc/cvmfs/repositories.d/" + repo_name + "/trusted_certs";
-  if (!server_tool->InitVerifyingSignatureManager(public_key, trusted_certs)) {
+  const std::string certificate = "/etc/cvmfs/keys/" + repo_name + ".crt";
+  const std::string private_key = "/etc/cvmfs/keys/" + repo_name + ".key";
+  if (!server_tool->InitSignatureManager(public_key, certificate, private_key))
+  {
     LogCvmfs(
         kLogReceiver, kLogSyslogErr,
         "CommitProcessor - error: Could not initialize the signature manager");
@@ -197,8 +198,6 @@ CommitProcessor::Result CommitProcessor::Process(
 
   UniquePtr<RaiiTempDir> raii_temp_dir(RaiiTempDir::Create(temp_dir_root));
   const std::string temp_dir = raii_temp_dir->dir();
-  const std::string certificate = "/etc/cvmfs/keys/" + repo_name + ".crt";
-  const std::string private_key = "/etc/cvmfs/keys/" + repo_name + ".key";
 
   if (!CreateNewTag(final_tag, repo_name, params, temp_dir, new_manifest_path,
                     public_key, params.proxy)) {
@@ -206,10 +205,6 @@ CommitProcessor::Result CommitProcessor::Process(
              final_tag.name().c_str());
     return kError;
   }
-
-  // We need to re-initialize the ServerTool component for signing
-  server_tool.Destroy();
-  server_tool = new ServerTool();
 
   LogCvmfs(kLogReceiver, kLogSyslog,
            "CommitProcessor - lease_path: %s, signing manifest",
@@ -256,11 +251,7 @@ CommitProcessor::Result CommitProcessor::Process(
       return kError;
     }
 
-    const std::string public_key = "/etc/cvmfs/keys/" + repo_name + ".pub";
-    const std::string trusted_certs =
-        "/etc/cvmfs/repositories.d/" + repo_name + "/trusted_certs";
-    if (!server_tool->InitVerifyingSignatureManager(public_key,
-                                                    trusted_certs)) {
+    if (!server_tool->InitSignatureManager(public_key)) {
       LogCvmfs(kLogReceiver, kLogSyslogErr,
                "CommitProcessor - error: Could not initialize the signature "
                "manager");

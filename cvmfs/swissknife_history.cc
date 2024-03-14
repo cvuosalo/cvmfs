@@ -60,9 +60,6 @@ CommandTag::Environment *CommandTag::InitializeEnvironment(
   const string pubkey_path = (args.find('p') == args.end())
                                  ? ""
                                  : MakeCanonicalPath(*args.find('p')->second);
-  const string trusted_certs = (args.find('z') == args.end())
-                                   ? ""
-                                   : MakeCanonicalPath(*args.find('z')->second);
   const shash::Any base_hash =
       (args.find('b') == args.end())
           ? shash::Any()
@@ -128,8 +125,7 @@ CommandTag::Environment *CommandTag::InitializeEnvironment(
   }
 
   // initialize the (swissknife global) signature manager (if possible)
-  if (!pubkey_path.empty() &&
-      !this->InitVerifyingSignatureManager(pubkey_path, trusted_certs)) {
+  if (!pubkey_path.empty() && !this->InitSignatureManager(pubkey_path)) {
     return NULL;
   }
 
