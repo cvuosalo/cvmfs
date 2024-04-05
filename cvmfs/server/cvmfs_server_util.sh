@@ -962,9 +962,9 @@ _update_geodb_install() {
   local download_target=${dbfile}.tgz
   local untar_dir=${dbfile}.untar
 
-  if [ -z "$CVMFS_GEO_ACCOUT_ID" ]; then
-      echo "CVMFS_GEO_ACCOUT_ID not set" >&2
-      _to_syslog_for_geoip "CVMFS_GEO_ACCOUT_ID not set"
+  if [ -z "$CVMFS_GEO_ACCOUNT_ID" ]; then
+      echo "CVMFS_GEO_ACCOUNT_ID not set" >&2
+      _to_syslog_for_geoip "CVMFS_GEO_ACCOUNT_ID not set"
       return 1
   fi
   if [ -z "$CVMFS_GEO_LICENSE_KEY" ]; then
@@ -978,7 +978,7 @@ _update_geodb_install() {
   # downloading the GeoIP database file
   curl -L -sS  --connect-timeout 10 \
             --max-time 60        \
-            -u "${CVMFS_GEO_ACCOUT_ID}:${CVMFS_GEO_LICENSE_KEY}" \
+            -u "${CVMFS_GEO_ACCOUNT_ID}:${CVMFS_GEO_LICENSE_KEY}" \
             "$dburl" > $download_target || true
   if ! tar tzf $download_target >/dev/null 2>&1; then
     local msg
